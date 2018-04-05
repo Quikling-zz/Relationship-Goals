@@ -5,8 +5,8 @@ Machine Learning algorithm for determining whether couples will stay together us
 Data from a Stanford Study: How Couples Meet and Stay Together (HCMST) Stanford Social Science Data Collection https://exhibits.stanford.edu/data/catalog/ns183dp7831.
 
 ## Goals
-1) Determine whether we can predict if couples will stay together using this data.
-2) If it is possible to predict, what features of the data are important to relationship stability.
+1) Determine whether we can predict if couples will stay together based on background features such as income, household information, how long ago the couple met, and how they met, among others (26 total).
+2) If it is possible to predict, what features among the selected features based on domain knowledge are important to relationship stability.
 3) Potentially attempt to predict the length of a relationship.
 
 ## Models

@@ -8,7 +8,7 @@ import os
 
 class Data :
     
-    def __init__(self, X=None, y=None, Xnames=None, yname=None) :
+    def __init__(self, X=None, y=None, Xnames=None, yname=None, weights=None) :
         """
         Data class.
         
@@ -23,6 +23,7 @@ class Data :
         self.y = y
         self.Xnames = Xnames
         self.yname = yname
+        self.weights = weights
     
     def load(self, filenameX, filenamey, header=0) :
         """
