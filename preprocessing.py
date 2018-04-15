@@ -13,6 +13,7 @@ def load_data(df_path):
 def remove_rows(df):
     """ remove single examples """
     df = df[df['s2'].notnull() & df['s2'].str.contains('single') == False]
+    df = df[df['s2'].notnull() & df['s2'].str.contains('refused') == False]
     return df
 
 def create_label(df):
@@ -28,9 +29,13 @@ def create_X(df):
      'met_through_friends', 'met_through_family', 'met_through_as_neighbors',
      'met_through_as_coworkers', 'how_long_ago_first_met', 'how_long_relationship',
      'how_long_ago_first_romantic', 'how_long_ago_first_cohab', 'relationship_quality', 'children_in_hh',
-     'number_of_marriages', 'edu_diff', 'same_race', 'same_polit', 'same_religion', 'same_highschool',
+     'number_of_marriages', 'edu_diff', 'edu_high', 'edu_low', 'edu_ave',
+     'same_race', 'same_polit', 'same_religion', 'same_highschool',
      'same_college', 'same_city', 'parents_involved', 'internet']
 
+    df['edu_high'] = df[ ['respondent_yrsed', 'partner_yrsed'] ].max(axis=1)
+    df['edu_low'] = df[ ['respondent_yrsed', 'partner_yrsed'] ].min(axis=1)
+    df['edu_ave'] = ( df['respondent_yrsed'] + df['partner_yrsed'] ) / 2.0
     df['edu_diff'] = abs( df['respondent_yrsed'] - df['partner_yrsed'])
     df['same_race'] = np.where(df['respondent_race'] == df['partner_race'], 1, 0)
 
@@ -134,16 +139,16 @@ def main():
     for f in Xnames:
         X[f] = X[f].astype('category')
         X[f] = X[f].cat.add_categories(-1).fillna(-1)
-    X = np.array(X)
+    npX = np.array(X)
 
     print 'The size of X: '
-    print X.shape
+    print npX.shape
 
     # obtain y
     df = create_label(df)
     y = np.array( df['y'] )
     print 'The size of y: '
     print y.shape
-    return X, y, Xnames
+    return npX, y, Xnames, X, df['y']
 
 main()

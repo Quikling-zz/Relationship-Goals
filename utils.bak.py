@@ -44,8 +44,8 @@ def plot_histogram(X, y, Xname, yname) :
     plt.legend(loc='upper left')
     plt.show()
 
-X, y, Xnames = main()
-n,d = X.shape
+npX, y, Xnames, X, df['y'] = main()
+n,d = npX.shape
 
 for i in xrange(0,26):
-    plot_histogram(X[:,i], y, Xname=Xnames[i], yname='still_together')
+    plot_histogram(npy, npX[:,i], Xname='still_together', yname=Xnames[i])
