@@ -99,11 +99,11 @@ class Data :
             features = set(self.X[:,i])
             nfeatures = len(features)
             test_range = range(int(math.floor(min(features))), int(math.ceil(max(features)))+1)
-            if nfeatures < 25 and sorted(features) == test_range:
+            if nfeatures < 33 and sorted(features) == test_range:
                 bins = test_range + [test_range[-1] + 1] # add last bin
                 align = 'left'
             else :
-                bins = 25
+                bins = 33
                 align = 'mid'
 
             # plot
@@ -126,6 +126,7 @@ def load_data(filenameX, filenamey, header=0) :
     data.load(filenameX, filenamey, header=header)
     return data
 
-npX, npy, Xnames, X, y = main()
-X.to_csv('Dataset/X.csv', index=False)
-y.to_csv('Dataset/y.csv', index=False, header=True)
+def update_data():
+    npX, npy, Xnames, X, y = main()
+    X.to_csv('Dataset/X.csv', index=False)
+    y.to_csv('Dataset/y.csv', index=False, header=True)

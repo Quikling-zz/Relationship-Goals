@@ -27,11 +27,11 @@ def plot_histogram(X, y, Xname, yname) :
     features = set(X)
     nfeatures = len(features)
     test_range = range(int(math.floor(min(features))), int(math.ceil(max(features)))+1)
-    if nfeatures < 25 and sorted(features) == test_range:
+    if nfeatures < 33 and sorted(features) == test_range:
         bins = test_range + [test_range[-1] + 1] # add last bin
         align = 'left'
     else :
-        bins = 25
+        bins = 33
         align = 'mid'
 
     # plot
@@ -44,8 +44,8 @@ def plot_histogram(X, y, Xname, yname) :
     plt.legend(loc='upper left')
     plt.show()
 
-npX, y, Xnames, X, df['y'] = main()
+npX, npy, Xnames, X, y = main()
 n,d = npX.shape
 
-for i in xrange(0,26):
+for i in xrange(0,33):
     plot_histogram(npy, npX[:,i], Xname='still_together', yname=Xnames[i])
