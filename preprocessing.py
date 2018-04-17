@@ -82,10 +82,11 @@ def create_X(df):
     quality_dict =  {"very poor": 0, "poor" : 1, "fair":2, "good":3, "excellent":4}
     qualityw4_dict ={ 'Refused': 5, "Very Poor": 0, "Poor" : 1, "Fair":2, "Good":3, "Excellent":4 }
     df['relationship_quality'] = df['relationship_quality'].apply(lambda x: quality_dict[x])
-    # quality_change - poisitive and higher means quality improvement
-    df['quality_change'] = df['w4_quality'].apply(lambda x: qualityw4_dict[x])
-    # df['quality_change'] = df['quality_new'] - df['relationship_quality']
-
+    # quality_change - higher means quality improvement
+    df['relationship_quality'] = df['relationship_quality'].astype('float32')
+    df['quality_new']= df['w4_quality'].apply(lambda x: qualityw4_dict[x])
+    df['quality_new'] = df['quality_new'].astype('float32')
+    df['quality_change'] = 4 + (df['quality_new'] - df['relationship_quality'])
 
     df['number_of_marriages'] = str_join(df, ' ', 'q17a', 'q17b')
     marriages_dict =  {"nan never married": 0, "nan once" : 1, "nan twice":2, "nan three times":3, "nan four or more times":4, "nan refused":5,
@@ -133,8 +134,10 @@ def create_X(df):
     # attracttiveness
     attracttiveness_dict = { 'very attractive': 3, 'moderately attractive': 2, 'slightly attractive':1, 'not at all attractive': 0, 'Refused': 4 }
     df['attractive_1'] = df['w4_attractive'].apply(lambda x: attracttiveness_dict[x])
-    df['attractiveness_diff'] = df['w4_attractive_partner'].apply(lambda x: attracttiveness_dict[x])
-    # df['attractiveness_diff'] = abs(df['attractive_1']-df['attractive_2'])
+    df['attractive_2'] = df['w4_attractive_partner'].apply(lambda x: attracttiveness_dict[x])
+    df['attractive_1'] = df['attractive_1'].astype('float32')
+    df['attractive_2'] = df['attractive_2'].astype('float32')
+    df['attractiveness_diff'] = abs(df['attractive_1']-df['attractive_2'])
 
     # sex frequency
     sex_freq_dict = {'Once a day or more': 4, '3 to 6 times a week': 3, 'Once or twice a week':2, '2 to 3 times a month': 1, 'Once a month or less':0, 'Refused':5}

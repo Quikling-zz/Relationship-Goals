@@ -108,7 +108,7 @@ class Data :
 
             # plot
             plt.figure()
-            n, bins, patches = plt.hist(data, bins=bins, align=align, alpha=0.5, label=labels, density=False)
+            n, bins, patches = plt.hist(data, bins=bins, align=align, alpha=0.5, label=labels, log=True, density=False)
             # n, bins, patches = plt.hist(data, density=True)
             plt.xlabel(self.Xnames[i])
             plt.ylabel('Frequency')

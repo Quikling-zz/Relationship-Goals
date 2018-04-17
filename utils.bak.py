@@ -36,7 +36,7 @@ def plot_histogram(X, y, Xname, yname) :
 
     # plot
     plt.figure()
-    n, bins, patches = plt.hist(data, bins=bins, align=align, alpha=0.5, label=labels, density = False)
+    n, bins, patches = plt.hist(data, bins=bins, align=align, alpha=0.5, label=labels, density = False, log=True)
     # n, bins, patches = plt.hist(data, density=True)
     plt.xlabel(Xname)
     plt.ylabel('Frequency')
