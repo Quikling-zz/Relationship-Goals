@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 # scikit-learn libraries
 from sklearn.dummy import DummyClassifier
 from sklearn.svm import SVC
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn import metrics
 from sklearn.utils import shuffle
 import utils as util
@@ -24,6 +24,41 @@ def set_data_weights(y, data):
     for sample in y.astype(int):
         sample_weights.append(class_weights[sample])
     data.weights = np.array(sample_weights)
+
+
+def select_param_linear(X, y, kf, metric="accuracy") :
+    """
+    Sweeps different settings for the hyperparameter of a linear-kernel SVM,
+    calculating the k-fold CV performance for each setting, then selecting the
+    hyperparameter that 'maximize' the average k-fold CV performance.
+    
+    Parameters
+    --------------------
+        X      -- numpy array of shape (n,d), feature vectors
+                    n = number of examples
+                    d = number of features
+        y      -- numpy array of shape (n,), binary labels {1,-1}
+        kf     -- model_selection.KFold or model_selection.StratifiedKFold
+        metric -- string, option used to select performance measure
+        plot   -- boolean, make a plot
+    
+    Returns
+    --------------------
+        C -- float, optimal parameter value for linear-kernel SVM
+    """
+    
+    print 'Linear SVM Hyperparameter Selection based on ' + str(metric) + ':'
+    C_range = 10.0 ** np.arange(-3, 3)
+    
+    ### ========== TODO : START ========== ###
+    # part 2c: select optimal hyperparameter using cross-validation
+    scores = [0 for _ in xrange(len(C_range))] # dummy values, feel free to change
+    
+    for i, C in enumerate(C_range):
+        clf = SVC(C=C, kernel="linear", class_weight="balanced")
+        scores[i] = cv_performance(clf, X, y, kf, metric=metric)
+    
+    return C_range[np.argmax(scores)]
 
 def select_param_rbf(X, y, kf, metric="accuracy") :
     """
@@ -159,44 +194,61 @@ def main():
     n_splits = 5
     kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=None)
 
-    svc_train_score = 0.0
-    svc_test_score = 0.0
-    dummy_train_score = 0.0
-    dummy_test_score = 0.0
     metric_list = ["accuracy", "f1_score", "auroc", "precision", "sensitivity", "specificity"]
-    score = np.zeros(4)
-    cm = np.zeros((2,2))
+
+    max_f1_linear = 0
 
     for train, test in kf.split(X, y):
-        X_train, X_test, y_train, y_test = X[train], X[test], y[train], y[test]
-        train_weights, test_weights = data.weights[train], data.weights[test]
+    #     X_train, X_test, y_train, y_test = X[train], X[test], y[train], y[test]
+    #     train_weights, test_weights = data.weights[train], data.weights[test]
 
-        print select_param_rbf(X_train, y_train, kf, metric="f1_score")
+    #     print select_param_rbf(X_train, y_train, kf, metric="f1_score")
 
+        max_f1_linear = max(max_f1_linear, select_param_linear(X, y, kf, metric="accuracy"))
+
+
+
+    C, gamma, coef0, degree = (100.0, 0.01, 1, 4)
+
+    X_train, X_test, y_train, y_test, weight_train, weight_test = train_test_split(X, y, data.weights, test_size=0.2, stratify=y)
 
 
     dumclf = DummyClassifier(strategy="most_frequent")
-    dumclf.fit(X_train, y_train, sample_weight=train_weights)
+    dumclf.fit(X_train, y_train, sample_weight=weight_train)
 
-    clf = SVC(class_weight="balanced")
-    clf.fit(X_train, y_train)
-    y_label = clf.predict(X_test)
+    rbfclf = SVC(C=C, gamma=gamma, coef0=coef0, degree=degree, class_weight="balanced")
+    rbfclf.fit(X_train, y_train)
+    y_pred = rbfclf.predict(X_test)
 
     # compute classifier performance
     for metric in metric_list:
-        print metric + ":", performance(y_test, y_label, metric)
+        print metric + ":", performance(y_test, y_pred, metric)
 
-    svc_train_score += clf.score(X_train, y_train)
-    svc_test_score += clf.score(X_test, y_test)
-    dummy_train_score += dumclf.score(X_train, y_train, train_weights)
-    dummy_test_score += dumclf.score(X_test, y_test, test_weights)
+    svc_train_score = rbfclf.score(X_train, y_train)
+    svc_test_score = rbfclf.score(X_test, y_test)
+    dummy_train_score = dumclf.score(X_train, y_train, weight_train)
+    dummy_test_score = dumclf.score(X_test, y_test, weight_test)
 
 
-    print "SVC train accuracy: %.6f" % (svc_train_score/n_splits)
-    print "Dummy train accuracy: %.6f" % (dummy_train_score/n_splits)
-    print "SVC test accuracy: %.6f" % (svc_test_score/n_splits)
-    print "Dummy test accuracy: %.6f" % (dummy_test_score/n_splits)
+    print "RBFSVC train accuracy: %.6f" % (svc_train_score)
+    print "Dummy train accuracy: %.6f" % (dummy_train_score)
+    print "RBFSVC test accuracy: %.6f" % (svc_test_score)
+    print "Dummy test accuracy: %.6f" % (dummy_test_score)
 
+
+    linclf = SVC(C=max_f1_linear, kernel="linear")
+
+    linclf.fit(X_train, y_train)
+
+    print "Linear SVC train accuracy: %.6f" % (linclf.score(X_train,y_train))
+    print "Linear SVC test accuracy: %.6f" % (linclf.score(X_test,y_test))
+
+    y_pred = linclf.predict(X_test)
+
+    print "Linear SVC test F1 score: %.6f" % (performance(y_test, y_pred, metric="f1_score"))
+
+    print "Top ten features (probably) in order from largest to smallest:"
+    print data.Xnames[linclf.coef_.argsort()[-10:][::-1]]
 
 if __name__ == "__main__" :
     main()
