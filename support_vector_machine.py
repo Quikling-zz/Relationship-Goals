@@ -206,7 +206,7 @@ def main():
 
         max_f1_linear = max(max_f1_linear, select_param_linear(X, y, kf, metric="accuracy"))
 
-
+    print 'max_f1_linear', max_f1_linear
 
     C, gamma, coef0, degree = (100.0, 0.01, 1, 4)
 
