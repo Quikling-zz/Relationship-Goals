@@ -168,7 +168,7 @@ def main():
     print 'The shape of dataset after concating:'
     print df.shape
     df = remove_rows(df)
-
+    updateData(False, df)
     # obtain X
     X, Xnames = create_X(df)
     for f in Xnames:
@@ -185,5 +185,17 @@ def main():
     # print 'The size of y: '
     # print  y.shape
     return npX, y, Xnames, X, df['y']
+
+def checkIfBetterOff(df):
+    X = create_label(df)
+    y = df['y']
+    return X,y
+
+def updateData(update, df):
+    if update:
+        X,y = checkIfBetterOff(df)
+        X.to_csv('Dataset/XTotal.csv', index=False)
+        y.to_csv('Dataset/yTotal.csv', index=False, header=True)
+
 
 main()
