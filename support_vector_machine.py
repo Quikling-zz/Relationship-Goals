@@ -103,7 +103,7 @@ def select_param_rbf(X, y, kf, metric="accuracy") :
     print scores, Ci, gammaj, coefk, degreel
     
     return scores.max(), C_range[Ci], gamma_range[gammaj], coef_range[coefk], degree_range[degreel]
-    ### ========== TODO : END ========== ###
+
 
 
 def cv_performance(clf, X, y, kf, metric="accuracy") :
@@ -188,7 +188,7 @@ def main():
     data = util.load_data(filenameX, filenamey, header=1)
 
     X, y = data.X, data.y
-
+    print data.Xnames
     set_data_weights(y, data)
 
     n_splits = 5
@@ -248,7 +248,8 @@ def main():
     print "Linear SVC test F1 score: %.6f" % (performance(y_test, y_pred, metric="f1_score"))
 
     print "Top ten features (probably) in order from largest to smallest:"
-    print data.Xnames[linclf.coef_.argsort()[-10:][::-1]]
+    indices = linclf.coef_[0].argsort()[-10:][::-1]
+    print [data.Xnames[i] for i in indices]
 
 if __name__ == "__main__" :
     main()

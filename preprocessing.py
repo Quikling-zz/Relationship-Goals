@@ -3,6 +3,8 @@ import numpy as np
 import csv
 
 df_path = "Dataset/HCMST_ver_3.04.dta"
+wave4_dfpath = 'Dataset/wave_4_supplement_v1_2.dta'
+wave5_dfpath = 'Dataset/HCMST_wave_5_supplement_ver_1.dta'
 
 def load_data(df_path):
     df = None
@@ -157,8 +159,6 @@ def str_join(df, sep, *cols):
     return reduce(lambda x, y: x.astype(str).str.cat(y.astype(str), sep=sep),[df[col] for col in cols])
 
 def main():
-    wave4_dfpath = 'Dataset/wave_4_supplement_v1_2.dta'
-    wave5_dfpath = 'Dataset/HCMST_wave_5_supplement_ver_1.dta'
     df = load_data(df_path)
     df_wave4 = load_data(wave4_dfpath)
     df_wave5 = load_data(wave5_dfpath)
