@@ -251,5 +251,43 @@ def main():
     indices = linclf.coef_[0].argsort()[-10:][::-1]
     print [data.Xnames[i] for i in indices]
 
+
+    print "RBF F1/accuracy score with each of the top ten features removed."
+    for i in indices:
+        X_train_mod = np.delete(X_train, i, 1)
+        X_test_mod = np.delete(X_test, i, 1)
+        rbfclf.fit(X_train_mod, y_train)
+        y_train_pred = rbfclf.predict(X_train_mod)
+        y_test_pred = rbfclf.predict(X_test_mod)
+
+        print "%s:" % (data.Xnames[i])
+        print "\tAccuracy: "
+        print "\t\tTrain: %.6f" % (rbfclf.score(X_train_mod, y_train))
+        print "\t\tTest: %.6f" % (rbfclf.score(X_test_mod, y_test))
+        print "\tF1 Score:"
+        print "\t\tTrain: %.6f" % (performance(y_train, y_train_pred, metric="f1_score"))
+        print "\t\tTest: %.6f" % (performance(y_test, y_test_pred, metric="f1_score"))
+
+
+    print "RBF Least predictive ten features (probably) in order from smallest to largest:"
+    indices = linclf.coef_[0].argsort()[:10]
+    print [data.Xnames[i] for i in indices]
+
+    print "F1/accuracy score with each of the bottom ten features removed cumulatively"
+    for i in indices:
+        X_train_mod = np.delete(X_train, indices[:i+1], 1)
+        X_test_mod = np.delete(X_test, indices[:i+1], 1)
+        rbfclf.fit(X_train_mod, y_train)
+        y_train_pred = rbfclf.predict(X_train_mod)
+        y_test_pred = rbfclf.predict(X_test_mod)
+
+        print "%s:" % (data.Xnames[i])
+        print "\tAccuracy: "
+        print "\t\tTrain: %.6f" % (rbfclf.score(X_train_mod, y_train))
+        print "\t\tTest: %.6f" % (rbfclf.score(X_test_mod, y_test))
+        print "\tF1 Score:"
+        print "\t\tTrain: %.6f" % (performance(y_train, y_train_pred, metric="f1_score"))
+        print "\t\tTest: %.6f" % (performance(y_test, y_test_pred, metric="f1_score"))
+
 if __name__ == "__main__" :
     main()
