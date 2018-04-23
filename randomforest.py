@@ -191,7 +191,7 @@ def performance(y_true, y_pred, metric="f1_score") :
 
     # compute classifier performance
     score = 0.0
-    matrix = metrics.confusion_matrix(y_true, y_label, labels=[1, -1])
+    matrix = metrics.confusion_matrix(y_true, y_label, labels=[1, 0])
     if metric == "accuracy":
         score = metrics.accuracy_score(y_true, y_label)
     elif metric == "f1_score":
@@ -409,28 +409,66 @@ def main():
     # after seclecting the optimal hyperparameters using one of the methods above
     #
     # the optimal hyperparameters below were found using select_params_rf_using_oob
-    rf = RandomForestClassifier(n_estimators=49, criterion="entropy", max_features=10,
-                                min_samples_leaf=1, oob_score=True, class_weight="balanced")
+    n_estimators = 49
+    max_features = 10
+    min_samples_leaf = 1
+    rf = RandomForestClassifier(n_estimators=n_estimators, criterion="entropy", max_features=max_features,
+    	                        min_samples_leaf=min_samples_leaf, oob_score=True, class_weight="balanced")
 
     rf.fit(X_train, y_train)
     y_pred = rf.predict(X_test)
+    y_pred_train = rf.predict(X_train)
 
     for metric in metric_list:
         print metric + ":", performance(y_test, y_pred, metric)
 
     rf_train_score = rf.score(X_train, y_train)
     rf_test_score = rf.score(X_test, y_test)
+    rf_test_f1_score = performance(y_test, y_pred, metric="f1_score")
+    rf_train_f1_score = performance(y_train, y_pred_train, metric="f1_score")
 
     print "RF train accuracy: %.6f" % (rf_train_score)
     print "RF test accuracy: %.6f" % (rf_test_score)
-    print "RF test F1 score: %.6f" % (performance(y_test, y_pred, metric="f1_score"))
+    print "RF train F1 score: %.6f" % (rf_train_f1_score)
+    print "RF test F1 score: %.6f" % (rf_test_f1_score)
+
     
+    # for confusion matrix
+    y_label = np.sign(y_pred)
+    y_label[y_label==-1] = 0 # map points of hyperplane to +1
+
+    matrix = metrics.confusion_matrix(y_test, y_label, labels=[1, 0])
+    print matrix
+    
+
+    
+    # baseline classifier
+    base_clf = DecisionTreeClassifier()
+    clf = BaggingClassifier(base_clf)
+    clf.fit(X_train, y_train)
+    y_pred_base = clf.predict(X_test)
+    y_pred_train_base = clf.predict(X_train)
+
+    clf_train_score = clf.score(X_train, y_train)
+    clf_test_score = clf.score(X_test, y_test)
+    clf_test_f1_score = performance(y_test, y_pred_base, metric="f1_score")
+    clf_train_f1_score = performance(y_train, y_pred_train_base, metric="f1_score")
+
+    print "Baseline train accuracy: %.6f" % (clf_train_score)
+    print "Baseline test accuracy: %.6f" % (clf_test_score)
+    print "Baseline train F1 score: %.6f" % (clf_train_f1_score) 
+    print "Baseline test F1 score: %.6f" % (clf_test_f1_score) 
+    
+
+    
+    # feature importance
     feature_indices = [i for i in range(d)]
     feature_importances = rf.feature_importances_
     index_and_importance = zip(feature_indices, feature_importances)
     small_to_large = sorted(index_and_importance, key=lambda tup: tup[1])
     large_to_small = small_to_large[::-1]
     all_features_in_order = [(data.Xnames[tup[0]], tup[1]) for tup in large_to_small]
+
 
     print "\n"
     print "RF feature importance in order from largest to smallest:"
@@ -455,9 +493,11 @@ def main():
         print "\tAccuracy: "
         print "\t\tTrain: %.6f" % (rf.score(X_train_mod, y_train))
         print "\t\tTest: %.6f" % (rf.score(X_test_mod, y_test))
+
         print "\tF1 Score:"
         print "\t\tTrain: %.6f" % (performance(y_train, y_train_pred, metric="f1_score"))
         print "\t\tTest: %.6f" % (performance(y_test, y_test_pred, metric="f1_score"))
+
 
     print "\n"
     print "RF least predictive ten features (probably) in order from smallest to largest:"
@@ -479,6 +519,7 @@ def main():
         print "\t\tTrain: %.6f" % (performance(y_train, y_train_pred, metric="f1_score"))
         print "\t\tTest: %.6f" % (performance(y_test, y_test_pred, metric="f1_score"))
     
+
 
 if __name__ == "__main__" :
     main()
