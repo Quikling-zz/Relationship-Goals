@@ -198,17 +198,17 @@ def main():
 
     max_f1_linear = 0
 
-    for train, test in kf.split(X, y):
+    # for train, test in kf.split(X, y):
     #     X_train, X_test, y_train, y_test = X[train], X[test], y[train], y[test]
     #     train_weights, test_weights = data.weights[train], data.weights[test]
 
     #     print select_param_rbf(X_train, y_train, kf, metric="f1_score")
 
-        max_f1_linear = max(max_f1_linear, select_param_linear(X, y, kf, metric="accuracy"))
+    #     max_f1_linear = max(max_f1_linear, select_param_linear(X, y, kf, metric="f1_score"))
 
     print 'max_f1_linear', max_f1_linear
 
-    C, gamma, coef0, degree = (100.0, 0.01, 1, 4)
+    C, gamma = (10.0, 0.1)
 
     X_train, X_test, y_train, y_test, weight_train, weight_test = train_test_split(X, y, data.weights, test_size=0.2, stratify=y)
 
@@ -216,7 +216,7 @@ def main():
     dumclf = DummyClassifier(strategy="most_frequent")
     dumclf.fit(X_train, y_train, sample_weight=weight_train)
 
-    rbfclf = SVC(C=C, gamma=gamma, coef0=coef0, degree=degree, class_weight="balanced")
+    rbfclf = SVC(C=C, gamma=gamma, class_weight="balanced")
     rbfclf.fit(X_train, y_train)
     y_pred = rbfclf.predict(X_test)
 
@@ -229,6 +229,7 @@ def main():
     dummy_train_score = dumclf.score(X_train, y_train, weight_train)
     dummy_test_score = dumclf.score(X_test, y_test, weight_test)
 
+    print metrics.confusion_matrix(y_test, y_pred, labels=[1, 0], sample_weight=weight_test)
 
     print "RBFSVC train accuracy: %.6f" % (svc_train_score)
     print "Dummy train accuracy: %.6f" % (dummy_train_score)
@@ -236,6 +237,7 @@ def main():
     print "Dummy test accuracy: %.6f" % (dummy_test_score)
 
 
+    max_f1_linear = 10.0
     linclf = SVC(C=max_f1_linear, kernel="linear")
 
     linclf.fit(X_train, y_train)
